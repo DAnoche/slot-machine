@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slot Machine</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        background-image: url("./casino-background.jpg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        animation: shake-screen 0.5s;
+      }
+
+      .heading {
+        width: 30em;
+      }
+
+      @keyframes shake-screen {
+        0% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        50% {
+          transform: translateX(10px);
+        }
+        75% {
+          transform: translateX(-10px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      .slot-machine {
+        top: 100px;
+        width: 800px;
+        padding: 60px;
+        border-radius: 5px;
+        background-color: #6600cc;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        justify-items: center;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .slot-machine::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        border: 1.5em dotted;
+        border-radius: 5px;
+        pointer-events: none; /* Ensure the pseudo-element doesn't interfere with interactions */
+        animation: blink-colors 1s linear infinite;
+        box-shadow: 10px 10px 5px 12px ffff33;
+      }
+
+      @keyframes blink-colors {
+        0% {
+          border-color: #ffffff;
+        }
+
+        50% {
+          border-color: #fdfd53;
+        }
+
+        100% {
+          border-color: #f7f700;
+        }
+      }
+
+      .reels-container {
+        display: flex;
+      }
+
+      .reel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 200px;
+        height: 200px;
+        margin: 20px;
+        font-size: 4em;
+        background-color: #fff;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 2.5em;
+        width: 4em;
+        background-color: #ffcc00;
+        color: #6600cc;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        animation: zoom-animation 2s ease-in-out infinite alternate;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .modal {
+        width: 400px;
+        padding: 40px;
+        background-color: #ffcc00;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8); /* Initial position and scale */
+        transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translateX(-5px);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+        100% {
+          transform: translateX(-5px);
+        }
+      }
+
+      .modal h2 {
+        margin-top: 0;
+        font-size: 3em;
+        color: #6600cc;
+      }
+
+      .modal p {
+        font-size: 2.5em;
+        color: #6600cc;
+      }
+
+      .modal-close {
+        padding: 5px 10px;
+        background-color: #c00;
+        color: #ffcc00;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      .image-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Align to the top */
+        position: absolute;
+        top: 50px; /* Adjust the top position as needed */
+        left: 0;
+        right: 0;
+        z-index: 2;
+        animation: zoom-animation 2s ease-in-out infinite alternate; /* Add animation property */
+      }
+
+      @keyframes zoom-animation {
+        0% {
+          transform: scale(1); /* Start with normal scale */
+        }
+        50% {
+          transform: scale(1.1); /* Zoom in to 1.1x scale */
+        }
+        100% {
+          transform: scale(1); /* Zoom out to normal scale */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="image-container">
+      <img class="heading" src="./jackpot.png" alt="Jackpot" />
+    </div>
+    <div class="slot-machine">
+      <div class="reels-container">
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+      </div>
+      <button id="spinButton">SPIN</button>
+    </div>
+
+    <script>
+      var spinButton = document.getElementById("spinButton");
+      spinButton.addEventListener("click", spinReels);
+
+      function spinReels() {
+        var reels = document.getElementsByClassName("reel");
+        var symbols = ["♠", "♥", "♦", "♣", "7", "BAR", "🍒", "🔔"];
+
+        // Disable the spin button during the animation
+        spinButton.disabled = true;
+
+        for (var i = 0; i < reels.length; i++) {
+          // Generate a random index for the symbols array
+          var randomIndex = Math.floor(Math.random() * symbols.length);
+
+          // Update the reel content to empty string
+          reels[i].textContent = "";
+
+          // Start the spinning animation
+          spinAnimation(reels[i], symbols[randomIndex], i);
+        }
+
+        // Wait for the animation to complete and show the modal
+        setTimeout(showPrizeModal, 3000);
+      }
+
+      function spinAnimation(reel, symbol, index) {
+        var frames = 60; // Number of frames for the animation
+        var duration = 3000; // Duration of the animation (in milliseconds)
+
+        var frameDuration = duration / frames;
+        var frameCount = 0;
+        var intervalId;
+
+        intervalId = setInterval(function () {
+          // Generate a random symbol for each frame
+          var randomSymbol = getRandomSymbol();
+
+          // Update the reel content
+          reel.textContent = randomSymbol;
+
+          frameCount++;
+
+          if (frameCount === frames) {
+            // Animation complete, display the final symbol
+            reel.textContent = symbol;
+
+            // Enable the spin button
+            spinButton.disabled = false;
+
+            clearInterval(intervalId);
+          }
+        }, frameDuration);
+      }
+
+      function getRandomSymbol() {
+        var symbols = ["♠", "♥", "♦", "♣", "7", "BAR", "🍒", "🔔"];
+        var randomIndex = Math.floor(Math.random() * symbols.length);
+        return symbols[randomIndex];
+      }
+
+      function showPrizeModal() {
+        var prizes = ["$100", "$50", "$25", "Free Spin", "Jackpot", "No Prize"];
+        var randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+
+        var modalOverlay = document.createElement("div");
+        modalOverlay.classList.add("modal-overlay");
+
+        var modal = document.createElement("div");
+        modal.classList.add("modal");
+        modal.innerHTML = `
+    <h2>Congratulations!</h2>
+    <p>You won: ${randomPrize}</p>
+    <button class="modal-close">Close</button>
+  `;
+
+        modalOverlay.appendChild(modal);
+        document.body.appendChild(modalOverlay);
+
+        var modalCloseButton = modal.querySelector(".modal-close");
+        modalCloseButton.addEventListener("click", function () {
+          modalOverlay.remove();
+        });
+
+        setTimeout(function () {
+          modal.style.opacity = "1";
+          modal.style.transform = "translateY(0) scale(1)";
+          modal.classList.add("shake-animation"); // Add the shake animation class
+        }, 10);
+
+        document.body.classList.add("shake-screen");
+
+        // Wait for a short delay, then remove the shake-screen class to stop the shaking
+        setTimeout(function () {
+          document.body.classList.remove("shake-screen");
+        }, 500);
+      }
+    </script>
+  </body>
+</html>
